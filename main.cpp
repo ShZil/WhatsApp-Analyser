@@ -47,6 +47,7 @@ data export (to python for rendering)
 */
 
 int main() {
-    printFile("text.txt");
+    printFile("raw/text.txt");
+    std::cout << "WOOO" << std::endl;
     return 0;
 }
