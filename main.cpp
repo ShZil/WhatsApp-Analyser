@@ -1,4 +1,7 @@
 #include <iostream>
+#include <fstream>
+#include <string>
+#include "txt_files.h"
 
 /*
     Modules:
@@ -44,6 +47,6 @@ data export (to python for rendering)
 */
 
 int main() {
-    std::cout << "Hello, world!" << std::endl;
+    printFile("text.txt");
     return 0;
 }

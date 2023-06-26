@@ -7,7 +7,7 @@
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
-                "${file}",
+                "${fileDirname}/*.cpp",  // Include all .cpp files in the directory
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe"
             ],
