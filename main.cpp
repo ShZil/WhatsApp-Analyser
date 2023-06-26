@@ -46,6 +46,13 @@ data export (to python for rendering)
 
 */
 
+/*
+    Conceptual:
+
+I wanna parse each message (collection of lines) and immediately pass it to DFs' analyses.
+So the whole thing is just one big iteration.
+*/
+
 int main() {
     printFile("raw/text.txt");
     std::cout << "WOOO" << std::endl;
