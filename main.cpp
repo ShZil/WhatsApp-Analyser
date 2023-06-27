@@ -56,7 +56,7 @@ So the whole thing is just one big iteration.
 */
 
 void handleFile(std::string);
-void handleMessage(std::string);
+void handleMessage(std::string, std::streampos);
 
 int main()
 {
@@ -80,10 +80,8 @@ void handleFile(std::string path) {
 
     while (std::getline(f, line, '\n')) {
         // Outsource to a function that determines whether a specific line is a `start` of a message or not.
-        handleMessage(line); // improve the logic here, to send multiple lines through.
+        handleMessage(line, currentPosition(f)); // improve the logic here, to send multiple lines through.
         // don't forget to ignore \r!
-        std::cout << "String length (inc. newline): " << line.size() + 1 << "   ";
-        std::cout << "Current pos: " << currentPosition(f) << std::endl;
     }
     f.clear();
     
@@ -94,8 +92,11 @@ void handleFile(std::string path) {
     f.close();
 }
 
-void handleMessage(std::string message) {
-    std::cout << message << std::endl; // propagate the message to all the DFs
+void handleMessage(std::string message, std::streampos end) {
+    int start = (int)end - message.length();
+    --start; // \n character
+    std::cout << "@" << start << " len=" << message.length() << "  " << message << std::endl;
+    // propagate the message to all the DFs
 }
 
 // Also cotinue translating the Python code
