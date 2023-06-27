@@ -32,3 +32,9 @@ std::vector<std::string> getPaths(std::string directoryPath) {
 std::streampos currentPosition(std::ifstream& f) {
     return f.tellg();
 }
+
+void extract(std::ifstream& f, char* buffer, int pos) {
+    f.clear();
+    f.seekg(pos, f.beg);
+    f.read(buffer, sizeof(buffer) - 1);
+}

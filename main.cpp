@@ -86,11 +86,9 @@ void handleFile(std::string path) {
         std::cout << "Current pos: " << currentPosition(f) << std::endl;
     }
     f.clear();
-
-    f.seekg(9, f.beg);
-    std::cout << "\n\n\nCurrent pos: " << currentPosition(f) << std::endl;
+    
     char buffer[8];
-    f.read(buffer, sizeof(buffer) - 1);
+    extract(f, buffer, 33);
     std::cout << buffer << std::endl;
 
     f.close();
