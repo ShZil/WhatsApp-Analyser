@@ -87,3 +87,7 @@ void handleMessage(std::string message) {
 // I've decided that it would be better to have everything as just a huge single DF
 // then, I could use `struct`s for the entries,
 // it'd make - calculating everything in one iteration - natural
+
+// instead of saving strings (char arrays) on the HEAP or STACK or whatever, save references to places in the file.
+// much more memory efficient, slight decrease in time efficiency because to print you need to read the file again.
+// std::istream::seekg -- Sets the position of the next character to be extracted from the input stream. 
