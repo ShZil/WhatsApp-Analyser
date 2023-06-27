@@ -57,9 +57,9 @@ So the whole thing is just one big iteration.
 
 void handleFile(std::string);
 void handleMessage(std::string, std::streampos);
+bool isNewMessage(std::string);
 
-int main()
-{
+int main() {
     std::vector<std::string> paths = getPaths("raw/");
     for (std::string path : paths)
     {
@@ -72,17 +72,25 @@ int main()
 
 void handleFile(std::string path) {
     std::string line;
+    std::string message = "";
     std::ifstream f(path, std::ios::binary);
     assert(f.good());
     
     f.seekg(0);
-    std::cout << "Current pos: " << currentPosition(f) << std::endl;
-
+    std::streampos start = currentPosition(f);
     while (std::getline(f, line, '\n')) {
         // Outsource to a function that determines whether a specific line is a `start` of a message or not.
-        handleMessage(line, currentPosition(f)); // improve the logic here, to send multiple lines through.
-        // don't forget to ignore \r!
+        if (!line.empty() && line.back() == '\r')
+            line.pop_back();
+        if (isNewMessage(line)) {
+            handleMessage(message, start);
+            message = "";
+        }
+        message += line;
+        start = currentPosition(f);
     }
+    handleMessage(message, start);
+    // get rid of `message`
     f.clear();
     
     char buffer[8];
@@ -92,11 +100,14 @@ void handleFile(std::string path) {
     f.close();
 }
 
-void handleMessage(std::string message, std::streampos end) {
-    int start = (int)end - message.length();
-    --start; // \n character // actually this won't work for multiline
+void handleMessage(std::string message, std::streampos start) {
     std::cout << "@" << start << " len=" << message.length() << "  " << message << std::endl;
     // propagate the message to all the DFs
+}
+
+bool isNewMessage(std::string line) {
+    if (line.length() == 0) return false;
+    return line.at(0) == '!'; // temporary lol
 }
 
 // Also cotinue translating the Python code
