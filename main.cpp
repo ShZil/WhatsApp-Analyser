@@ -94,7 +94,7 @@ void handleFile(std::string path) {
 
 void handleMessage(std::string message, std::streampos end) {
     int start = (int)end - message.length();
-    --start; // \n character
+    --start; // \n character // actually this won't work for multiline
     std::cout << "@" << start << " len=" << message.length() << "  " << message << std::endl;
     // propagate the message to all the DFs
 }
@@ -104,8 +104,7 @@ void handleMessage(std::string message, std::streampos end) {
 // I've decided that it would be better to have everything as just a huge single DF
 // then, I could use `struct`s for the entries,
 // it'd make - calculating everything in one iteration - natural
+// make those structs. Also note that an int (or a short) could be enough for authors, if you maintain a separate list thereof
 
 // instead of saving strings (char arrays) on the HEAP or STACK or whatever, save references to places in the file.
 // much more memory efficient, slight decrease in time efficiency because to print you need to read the file again.
-// std::istream::seekg -- Sets the position of the next character to be extracted from the input stream.
-// std::istream::read -- reads a certain amount of bytes
