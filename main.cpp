@@ -54,6 +54,9 @@ I wanna parse each message (collection of lines) and immediately pass it to DFs'
 So the whole thing is just one big iteration.
 */
 
+void handleFile(std::string);
+void handleMessage(std::string);
+
 int main()
 {
     std::vector<std::string> paths = getPaths("raw/");
@@ -68,14 +71,17 @@ int main()
 
 void handleFile(std::string path) {
     std::string line;
-    std::ifstream file(path);
+    std::ifstream f(path);
+    
+    std::cout << "Current pos: " << currentPosition(f) << std::endl;
 
-    while (std::getline(file, line)) {
+    while (std::getline(f, line)) {
         // Outsource to a function that determines whether a specific line is a `start` of a message or not.
+        std::cout << "Current pos: " << currentPosition(f) << std::endl;
         handleMessage(line); // improve the logic here, to send multiple lines through.
     }
 
-    file.close();
+    f.close();
 }
 
 void handleMessage(std::string message) {
@@ -90,4 +96,5 @@ void handleMessage(std::string message) {
 
 // instead of saving strings (char arrays) on the HEAP or STACK or whatever, save references to places in the file.
 // much more memory efficient, slight decrease in time efficiency because to print you need to read the file again.
-// std::istream::seekg -- Sets the position of the next character to be extracted from the input stream. 
+// std::istream::seekg -- Sets the position of the next character to be extracted from the input stream.
+// std::istream::read -- reads a certain amount of bytes
