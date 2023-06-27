@@ -3,4 +3,4 @@
 #include <fstream>
 void printFile(std::string);
 std::vector<std::string> getPaths(std::string);
-int currentPosition(std::ifstream&);
+std::streampos currentPosition(std::ifstream&);

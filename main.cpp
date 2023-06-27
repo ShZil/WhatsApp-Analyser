@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "txt_files.h"
+#include <assert.h>
 
 /*
     Modules:
@@ -71,15 +72,25 @@ int main()
 
 void handleFile(std::string path) {
     std::string line;
-    std::ifstream f(path);
+    std::ifstream f(path, std::ios::binary);
+    assert(f.good());
     
+    f.seekg(0);
     std::cout << "Current pos: " << currentPosition(f) << std::endl;
 
-    while (std::getline(f, line)) {
+    while (std::getline(f, line, '\n')) {
         // Outsource to a function that determines whether a specific line is a `start` of a message or not.
-        std::cout << "Current pos: " << currentPosition(f) << std::endl;
         handleMessage(line); // improve the logic here, to send multiple lines through.
+        std::cout << "String length (inc. newline): " << line.size() + 1 << "   ";
+        std::cout << "Current pos: " << currentPosition(f) << std::endl;
     }
+    f.clear();
+
+    f.seekg(9, f.beg);
+    std::cout << "\n\n\nCurrent pos: " << currentPosition(f) << std::endl;
+    char buffer[8];
+    f.read(buffer, sizeof(buffer) - 1);
+    std::cout << buffer << std::endl;
 
     f.close();
 }

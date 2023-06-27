@@ -29,6 +29,6 @@ std::vector<std::string> getPaths(std::string directoryPath) {
     return paths;
 }
 
-int currentPosition(std::ifstream& f) {
-    return (int)f.tellg();
+std::streampos currentPosition(std::ifstream& f) {
+    return f.tellg();
 }
