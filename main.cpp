@@ -83,3 +83,7 @@ void handleMessage(std::string message) {
 }
 
 // Also cotinue translating the Python code
+
+// I've decided that it would be better to have everything as just a huge single DF
+// then, I could use `struct`s for the entries,
+// it'd make - calculating everything in one iteration - natural
