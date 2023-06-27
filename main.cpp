@@ -81,6 +81,7 @@ void handleFile(std::string path) {
     while (std::getline(f, line, '\n')) {
         // Outsource to a function that determines whether a specific line is a `start` of a message or not.
         handleMessage(line); // improve the logic here, to send multiple lines through.
+        // don't forget to ignore \r!
         std::cout << "String length (inc. newline): " << line.size() + 1 << "   ";
         std::cout << "Current pos: " << currentPosition(f) << std::endl;
     }
