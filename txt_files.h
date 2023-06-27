@@ -1,2 +1,4 @@
 #include <string>
-void printFile(std::string path);
+#include <vector>
+void printFile(std::string);
+std::vector<std::string> getPaths(std::string);

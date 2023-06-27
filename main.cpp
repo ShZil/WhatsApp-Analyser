@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 #include "txt_files.h"
 
 /*
@@ -53,8 +54,13 @@ I wanna parse each message (collection of lines) and immediately pass it to DFs'
 So the whole thing is just one big iteration.
 */
 
-int main() {
-    printFile("raw/text.txt");
-    std::cout << "WOOO" << std::endl;
+int main()
+{
+    std::vector<std::string> paths = getPaths("raw/");
+    for (std::string path : paths)
+    {
+        std::cout << path << std::endl;
+        printFile(path);
+    }
     return 0;
 }
