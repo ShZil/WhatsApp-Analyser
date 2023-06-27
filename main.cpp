@@ -59,7 +59,7 @@ int main()
     std::vector<std::string> paths = getPaths("raw/");
     for (std::string path : paths)
     {
-        std::cout << path << std::endl;
+        std::cout << path << std::endl; // improve this printing to call out "This is the chat with XYZ"
         
         handleFile(path);
     }
@@ -81,3 +81,5 @@ void handleFile(std::string path) {
 void handleMessage(std::string message) {
     std::cout << message << std::endl; // propagate the message to all the DFs
 }
+
+// Also cotinue translating the Python code
