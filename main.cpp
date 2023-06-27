@@ -60,7 +60,24 @@ int main()
     for (std::string path : paths)
     {
         std::cout << path << std::endl;
-        printFile(path);
+        
+        handleFile(path);
     }
     return 0;
+}
+
+void handleFile(std::string path) {
+    std::string line;
+    std::ifstream file(path);
+
+    while (std::getline(file, line)) {
+        // Outsource to a function that determines whether a specific line is a `start` of a message or not.
+        handleMessage(line); // improve the logic here, to send multiple lines through.
+    }
+
+    file.close();
+}
+
+void handleMessage(std::string message) {
+    std::cout << message << std::endl; // propagate the message to all the DFs
 }
