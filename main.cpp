@@ -68,7 +68,8 @@ int main() {
     std::vector<std::string> paths = getPaths("raw/");
     for (std::string path : paths)
     {
-        std::cout << "Reading: " <<  path << std::endl; // improve this printing to call out "This is the chat with XYZ"
+        // TODO: consider only `.txt` files, not `.txt.ignore`.
+        std::cout << "Reading: " << path << std::endl; // improve this printing to call out "This is the chat with XYZ"
         
         handleFile(path);
     }
@@ -76,7 +77,7 @@ int main() {
 }
 
 void handleFile(std::string path) {
-    int messageFormat = DMY | Slashes | Dash | ParenthesesHMS; // later on I'll add automatic format detection. Right now it's hardcoded.
+    int messageFormat = DMY | Slashes | Dash; // later on I'll add automatic format detection. Right now it's hardcoded.
 
     std::string line;
     std::string message = "";
@@ -99,7 +100,7 @@ void handleFile(std::string path) {
         }
         message += line; // add a line to the message
         pos = currentPosition(f); // update the cursor position (placed at the end of `line`)
-        if ((int)pos > 1000) break;
+        if ((int)pos > 1000) break; // artificial limitation, remove when you think.
     }
     handleMessage(message, start);
     // TODO: get rid of `message`
