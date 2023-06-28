@@ -60,7 +60,7 @@ enum MessageFormat {
     MDY = 2,
     Slashes = 4,
     Dots = 8,
-    Parentheses = 16,
+    ParenthesesHMS = 16,
     Dash = 32
 };
 
@@ -76,7 +76,7 @@ int main() {
 }
 
 void handleFile(std::string path) {
-    int messageFormat = DMY | Slashes | Dash | Parentheses; // later on I'll add automatic format detection. Right now it's hardcoded.
+    int messageFormat = DMY | Slashes | Dash | ParenthesesHMS; // later on I'll add automatic format detection. Right now it's hardcoded.
 
     std::string line;
     std::string message = "";
@@ -123,7 +123,7 @@ void handleMessage(std::string message, std::streampos startpos) {
 
 bool isNewMessage(std::string line, int format) {
     if (line.length() < 19) return false;
-    if (format & Parentheses) {
+    if (format & ParenthesesHMS) {
         if (line[0] != '[') return false;
         line.erase(0, 1);
     }
