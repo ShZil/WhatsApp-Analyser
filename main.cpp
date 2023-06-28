@@ -78,6 +78,7 @@ void handleFile(std::string path) {
     
     f.seekg(0);
     std::streampos start = currentPosition(f);
+    std::streampos pos = currentPosition(f);
     while (std::getline(f, line, '\n')) {
         // Outsource to a function that determines whether a specific line is a `beginning` of a message or not.
         if (!line.empty() && line.back() == '\r')
@@ -85,9 +86,10 @@ void handleFile(std::string path) {
         if (isNewMessage(line)) {
             handleMessage(message, start);  // this is the wrong `start` value. rething the logic
             message = "";
+            start = pos;
         }
         message += line;
-        start = currentPosition(f);
+        pos = currentPosition(f);
     }
     handleMessage(message, start);
     // get rid of `message`
