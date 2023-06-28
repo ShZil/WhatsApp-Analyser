@@ -104,10 +104,12 @@ void handleFile(std::string path) {
     f.close();
 }
 
-void handleMessage(std::string message, std::streampos start) {
+void handleMessage(std::string message, std::streampos startpos) {
     if (!message.empty() && message.back() == '\n')
         message.pop_back(); // remove trailing newline
-    std::cout << "@" << start << " len=" << message.length() << "  " << message << std::endl;
+    int length = message.length();
+    int start = (int)startpos;
+    std::cout << "@" << start << " len=" << length << "  " << message << std::endl;
     // propagate the message to all the DFs
 }
 
