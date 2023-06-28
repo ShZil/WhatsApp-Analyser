@@ -82,23 +82,23 @@ void handleFile(std::string path) {
     while (std::getline(f, line, '\n')) {
         // Outsource to a function that determines whether a specific line is a `beginning` of a message or not.
         if (!line.empty() && line.back() == '\r')
-            line.pop_back();
-        if (line.empty() || line.back() != '\n')
-            line += "\n";
+            line.pop_back(); // remove `\r` characters
+        if (line.empty() || line.back() != '\n') // The condition is a tad excessive (no `line` will have a `\n` already), but it's not problematic.
+            line += "\n"; // add newline character.
         if (isNewMessage(line)) {
             handleMessage(message, start);
-            message = "";
-            start = pos;
+            message = ""; // reset the `message` accumulator, to start a new message.
+            start = pos; // reset the `start` of that new message to the [byte after last of the last line of the previous message].
         }
-        message += line;
-        pos = currentPosition(f);
+        message += line; // add a line to the message
+        pos = currentPosition(f); // update the cursor position (placed at the end of `line`)
     }
     handleMessage(message, start);
-    // get rid of `message`
+    // TODO: get rid of `message`
     f.clear();
     
     char buffer[8];
-    extract(f, buffer, 13);
+    extract(f, buffer, 13); // extract 7 bytes from position 13 in the file `f`.
     // std::cout << buffer << std::endl;
 
     f.close();
