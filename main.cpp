@@ -83,8 +83,10 @@ void handleFile(std::string path) {
         // Outsource to a function that determines whether a specific line is a `beginning` of a message or not.
         if (!line.empty() && line.back() == '\r')
             line.pop_back();
+        if (line.empty() || line.back() != '\n')
+            line += "\n";
         if (isNewMessage(line)) {
-            handleMessage(message, start);  // this is the wrong `start` value. rething the logic
+            handleMessage(message, start);
             message = "";
             start = pos;
         }
@@ -96,13 +98,15 @@ void handleFile(std::string path) {
     f.clear();
     
     char buffer[8];
-    extract(f, buffer, 33);
-    std::cout << buffer << std::endl;
+    extract(f, buffer, 13);
+    // std::cout << buffer << std::endl;
 
     f.close();
 }
 
 void handleMessage(std::string message, std::streampos start) {
+    if (!message.empty() && message.back() == '\n')
+        message.pop_back(); // remove trailing newline
     std::cout << "@" << start << " len=" << message.length() << "  " << message << std::endl;
     // propagate the message to all the DFs
 }
