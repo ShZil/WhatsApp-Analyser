@@ -68,7 +68,7 @@ int main() {
     std::vector<std::string> paths = getPaths("raw/");
     for (std::string path : paths)
     {
-        std::cout << path << std::endl; // improve this printing to call out "This is the chat with XYZ"
+        std::cout << "Reading: " <<  path << std::endl; // improve this printing to call out "This is the chat with XYZ"
         
         handleFile(path);
     }
