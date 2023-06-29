@@ -248,7 +248,7 @@ bool isNewMessage(std::string line, int format) {
             line[11] == ' ';
     if (line[13] == ':') {
         // insert `0` between 11 and 12, then continue normally. (singular left zero-pad)
-        line.insert(11, 1, '0');
+        line.insert(12, 1, '0');
     }
     // /(\d|0)\d:\d\d/
     flag &= isdigit(line[12]) &&
