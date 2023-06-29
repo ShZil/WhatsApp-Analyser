@@ -82,6 +82,8 @@ struct Message {
     char day;
     char hour;
     char minute;
+
+    float ioc;
 };
 void printMessage(Message*);
 
@@ -174,11 +176,25 @@ void handleMessage(std::string content, std::streampos startpos, int format) {
     message->minute = minute;
 
     std::stringstream author;
+    bool found = false;
     for (i = (format & ParenthesesHMS) ? 22 : 20; i <= message->length; ++i) {
-        if (content[i] == ':') break;
+        if (content[i] == ':') {
+            found = true;
+            break;
+        }
         author << content[i];
     }
-    message->author = author.str();
+    message->author = found ? author.str() : "WhatsApp";
+
+    if (found) {
+        // actual message content
+        std::string text = content.substr(i + 1);
+        // ioc = sum(count * (count-1)) where count is every character's appearance count.
+        // Divided by length * (length-1)
+        
+    } else {
+        message->ioc = 0.0f;
+    }
 
     printMessage(message);
     std::cout << content << std::endl;
@@ -189,6 +205,7 @@ void printMessage(Message* message) {
     std::cout << "Message at " << message->start << "; len=" << message->length << std::endl;
     std::cout << "Written by " << message->author << std::endl << "Time: ";
     std::cout << +message->year << '-' << +message->month << '-' << +message->day << 'T' << +message->hour << ':' << +message->minute << std::endl;
+    std::cout << "ioc=" << message->ioc;
 }
 
 bool isNewMessage(std::string line, int format) {
