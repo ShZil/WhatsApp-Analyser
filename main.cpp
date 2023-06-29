@@ -129,20 +129,32 @@ bool isNewMessage(std::string line, int format) {
         line.erase(0, 1);
     }
     bool flag = true;
-    flag &= isDigit(line[0]) && isDigit(line[1]) && isSeparator(line[2], format); // /\d\d(\/|\.)/
-    flag &= isDigit(line[3]) && isDigit(line[4]) && isSeparator(line[5], format); // /\d\d(\/|\.)/
-    flag &= isDigit(line[6]) && isDigit(line[7]) && isDigit(line[8]) && isDigit(line[9]); // /\d\d\d\d/
-    flag &= line[10] == ',' && line[11] == ' ';
-    flag &= isDigit(line[12]);
-    flag &= isDigit(line[15]);
+    // /\d\d(\/|\.)\d\d(\/|\.)\d\d\d\d, /
+    flag &= isDigit(line[0]) &&
+            isDigit(line[1]) &&
+            isSeparator(line[2], format) &&
+            isDigit(line[3]) &&
+            isDigit(line[4]) &&
+            isSeparator(line[5], format) &&
+            isDigit(line[6]) &&
+            isDigit(line[7]) &&
+            isDigit(line[8]) &&
+            isDigit(line[9]) &&
+            line[10] == ',' &&
+            line[11] == ' ';
     if (line[13] == ':') {
-        flag &= isDigit(line[14]);
-    } else {
-        flag &= isDigit(line[13]) && line[14] == ':' && isDigit(line[16]);
+        // insert `0` between 11 and 12, then continue normally. (zero-pad)
+        line.insert(11, 1, '0');
     }
+    flag &= isDigit(line[12]) && isDigit(line[13]) && line[14] == ':' && isDigit(line[15]) && isDigit(line[16]);
+
+    // 0123456789ABCDEF- (indexes)
+    // dd.dd.dddd, 0d:dd  OR
+    // dd.dd.dddd, dd:dd
     return flag;
 
-    // check number's ranges (1-12, 1-31)
+    // TODO: check number's ranges (1-12, 1-31)
+    // TODO: check that a dash exists (if format & Dash)
 }
 
 bool isDigit(char c) {
