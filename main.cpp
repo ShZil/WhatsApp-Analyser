@@ -125,7 +125,7 @@ void handleMessage(std::string message, std::streampos startpos) {
 }
 
 bool isNewMessage(std::string line, int format) {
-    if (line.length() < 19) return false;
+    if (line.length() < 20) return false;
     if (format & ParenthesesHMS) {
         if (line[0] != '[') return false;
         line.erase(0, 1);
@@ -145,7 +145,7 @@ bool isNewMessage(std::string line, int format) {
             line[10] == ',' &&
             line[11] == ' ';
     if (line[13] == ':') {
-        // insert `0` between 11 and 12, then continue normally. (zero-pad)
+        // insert `0` between 11 and 12, then continue normally. (singular left zero-pad)
         line.insert(11, 1, '0');
     }
     // /(\d|0)\d:\d\d/
@@ -158,10 +158,24 @@ bool isNewMessage(std::string line, int format) {
     // 0123456789ABCDEF- (indexes)
     // dd.dd.dddd, 0d:dd  OR
     // dd.dd.dddd, dd:dd
+
+    if (format & ParenthesesHMS) {
+        // :dd]
+        flag &= line.length() > 20 &&
+                line[17] == ':' &&
+                isdigit(line[18]) &&
+                isdigit(line[19]) &&
+                line[20] == ']';
+    } else if (format & Dash) {
+        flag &= line[17] == ' ' &&
+                line[18] == '-' &&
+                line[19] == ' ';
+    } else {
+        throw 33; // invalid format
+    }
     return flag;
 
     // TODO: check number's ranges (1-12, 1-31) // look at `atoi`.
-    // TODO: check that a dash exists (if format & Dash) or closing parentheses
 }
 
 bool isSeparator(char c, int format) {
