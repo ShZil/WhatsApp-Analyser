@@ -49,6 +49,8 @@ I wanna parse each message (collection of lines) and immediately pass it to DFs'
 So the whole thing is just one big iteration.
 */
 
+// See std::wstring for multilanguage support
+
 void handleFile(std::string);
 void handleMessage(std::string, std::streampos);
 bool isNewMessage(std::string, int);
@@ -66,6 +68,20 @@ enum MessageFormat {
     Dash = 32
 };
 
+struct Message {
+    int start;
+    unsigned short length; // verified max length of a WhatsApp message
+
+    // int author; // index in an authors array
+    std::string author; // temporary
+
+    short year; // -32 768 to 32 767
+    char month;
+    char day;
+    char hour;
+    char minute;
+};
+
 int main() {
     std::vector<std::string> paths = getPaths("raw/");
     for (std::string path : paths)
@@ -75,6 +91,7 @@ int main() {
         
         handleFile(path);
     }
+
     return 0;
 }
 
