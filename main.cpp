@@ -83,6 +83,7 @@ struct Message {
     char hour;
     char minute;
 };
+void printMessage(Message*);
 
 int main() {
     std::vector<std::string> paths = getPaths("raw/");
@@ -117,15 +118,16 @@ void handleFile(std::string path) {
         if (isNewMessage(line, messageFormat)) {
             handleMessage(message, start, messageFormat);
             message = ""; // reset the `message` accumulator, to start a new message.
-            start = pos; // reset the `start` of that new message to the [byte after last of the last line of the previous message].
+            start = pos; // reset the `start` of that new message to the [byte-after-last of the last-line of the previous-message].
         }
         message += line; // add a line to the message
         pos = currentPosition(f); // update the cursor position (placed at the end of `line`)
         if ((int)pos > 1000) break; // artificial limitation, remove when you think.
+        if (message.length() > 10000) break; // messages shall not be longer than 10000 characters, that would mean the file is not a chat
     }
     if (isNewMessage(message, messageFormat))
         handleMessage(message, start, messageFormat);
-    // TODO: get rid of `message`
+    // TODO: get rid of `message`?
     f.clear();
     
     char buffer[8];
@@ -140,9 +142,9 @@ void handleMessage(std::string content, std::streampos startpos, int format) {
         content.pop_back(); // remove trailing newline
     if (content.length() < 20) return; // invalid message, probably `@0 len=0` at the start of the file.
     
-    Message message;
-    message.length = (unsigned short)content.length();
-    message.start = (int)startpos;
+    Message* message = new Message();
+    message->length = (unsigned short)content.length();
+    message->start = (int)startpos;
     if (format & ParenthesesHMS && content[0] == '[') {
         content.erase(0, 1);
     }
@@ -165,16 +167,28 @@ void handleMessage(std::string content, std::streampos startpos, int format) {
         day = temp;
     }
 
-    message.year = year;
-    message.month = month;
-    message.day = day;
-    message.hour = hour;
-    message.minute = minute;
+    message->year = year;
+    message->month = month;
+    message->day = day;
+    message->hour = hour;
+    message->minute = minute;
 
-    std::cout << "@" << message.start << " len=" << message.length << std::endl;
-    std::cout << year << '-' << month << '-' << day << 'T' << hour << ':' << minute << std::endl;
-    std::cout << "  " << content << std::endl;
+    std::stringstream author;
+    for (i = (format & ParenthesesHMS) ? 22 : 20; i <= message->length; ++i) {
+        if (content[i] == ':') break;
+        author << content[i];
+    }
+    message->author = author.str();
+
+    printMessage(message);
+    std::cout << content << std::endl;
     // propagate the message to all the DFs
+}
+
+void printMessage(Message* message) {
+    std::cout << "Message at " << message->start << "; len=" << message->length << std::endl;
+    std::cout << "Written by " << message->author << std::endl << "Time: ";
+    std::cout << +message->year << '-' << +message->month << '-' << +message->day << 'T' << +message->hour << ':' << +message->minute << std::endl;
 }
 
 bool isNewMessage(std::string line, int format) {
