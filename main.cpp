@@ -160,7 +160,9 @@ void handleMessage(std::string content, std::streampos startpos, int format) {
     char _;
     datetime >> day >> _ >> month >> _ >> year >> _ >> hour >> _ >> minute;
     if (format & MDY) {
-        day ^= month ^= day ^= month; // swap day and month using XOR
+        int temp = month;
+        month = day;
+        day = temp;
     }
 
     message.year = year;
