@@ -2,8 +2,10 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include "txt_files.h"
 #include <assert.h>
+#include <sstream>
+
+#include "txt_files.h"
 
 /*
     Modules:
@@ -52,7 +54,7 @@ So the whole thing is just one big iteration.
 // See std::wstring for multilanguage support
 
 void handleFile(std::string);
-void handleMessage(std::string, std::streampos);
+void handleMessage(std::string, std::streampos, int);
 bool isNewMessage(std::string, int);
 bool isSeparator(char, int format);
 
@@ -113,7 +115,7 @@ void handleFile(std::string path) {
         if (line.empty() || line.back() != '\n') // The condition is a tad excessive (no `line` will have a `\n` already), but it's not problematic.
             line += "\n"; // add newline character.
         if (isNewMessage(line, messageFormat)) {
-            handleMessage(message, start);
+            handleMessage(message, start, messageFormat);
             message = ""; // reset the `message` accumulator, to start a new message.
             start = pos; // reset the `start` of that new message to the [byte after last of the last line of the previous message].
         }
@@ -121,7 +123,8 @@ void handleFile(std::string path) {
         pos = currentPosition(f); // update the cursor position (placed at the end of `line`)
         if ((int)pos > 1000) break; // artificial limitation, remove when you think.
     }
-    handleMessage(message, start);
+    if (isNewMessage(message, messageFormat))
+        handleMessage(message, start, messageFormat);
     // TODO: get rid of `message`
     f.clear();
     
@@ -132,12 +135,41 @@ void handleFile(std::string path) {
     f.close();
 }
 
-void handleMessage(std::string message, std::streampos startpos) {
-    if (!message.empty() && message.back() == '\n')
-        message.pop_back(); // remove trailing newline
-    int length = message.length();
-    int start = (int)startpos;
-    std::cout << "@" << start << " len=" << length << "  " << message << std::endl;
+void handleMessage(std::string content, std::streampos startpos, int format) {
+    if (!content.empty() && content.back() == '\n')
+        content.pop_back(); // remove trailing newline
+    if (content.length() < 20) return; // invalid message, probably `@0 len=0` at the start of the file.
+    
+    Message message;
+    message.length = (unsigned short)content.length();
+    message.start = (int)startpos;
+    if (format & ParenthesesHMS && content[0] == '[') {
+        content.erase(0, 1);
+    }
+    if (content[13] == ':') {
+        // insert `0` between 11 and 12, then continue normally. (singular left zero-pad)
+        content.insert(11, 1, '0');
+    }
+    int i = 0;
+    std::stringstream datetime;
+    for (i = 0; i <= 16; ++i) {
+        datetime << content[i];
+    }
+
+    int year, month, day, hour, minute;
+    char _;
+    datetime >> day >> _ >> month >> _ >> year >> _ >> hour >> _ >> minute;
+    if (format & MDY) {
+        day ^= month ^= day ^= month; // swap day and month using XOR
+    }
+
+    message.year = year;
+    message.month = month;
+    message.day = day;
+    message.hour = hour;
+    message.minute = minute;
+
+    std::cout << "@" << message.start << " len=" << message.length << "  " << content << std::endl;
     // propagate the message to all the DFs
 }
 
@@ -190,6 +222,8 @@ bool isNewMessage(std::string line, int format) {
     } else {
         throw 33; // invalid format
     }
+
+
     return flag;
 
     // TODO: check number's ranges (1-12, 1-31) // look at `atoi`.
