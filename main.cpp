@@ -169,7 +169,9 @@ void handleMessage(std::string content, std::streampos startpos, int format) {
     message.hour = hour;
     message.minute = minute;
 
-    std::cout << "@" << message.start << " len=" << message.length << "  " << content << std::endl;
+    std::cout << "@" << message.start << " len=" << message.length << std::endl;
+    std::cout << year << '-' << month << '-' << day << 'T' << hour << ':' << minute << std::endl;
+    std::cout << "  " << content << std::endl;
     // propagate the message to all the DFs
 }
 
