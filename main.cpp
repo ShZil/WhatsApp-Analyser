@@ -52,14 +52,16 @@ So the whole thing is just one big iteration.
 void handleFile(std::string);
 void handleMessage(std::string, std::streampos);
 bool isNewMessage(std::string, int);
-bool isDigit(char); // no need to write mine, `isdigit` already exists. Also look at `atoi`
 bool isSeparator(char, int format);
 
 enum MessageFormat {
+    // DMY and MDY are exclusive
     DMY = 1,
     MDY = 2,
+    // Slashes and dots are exclusive
     Slashes = 4,
     Dots = 8,
+    // Paremtjeses and Dash are exclusive
     ParenthesesHMS = 16,
     Dash = 32
 };
@@ -130,35 +132,36 @@ bool isNewMessage(std::string line, int format) {
     }
     bool flag = true;
     // /\d\d(\/|\.)\d\d(\/|\.)\d\d\d\d, /
-    flag &= isDigit(line[0]) &&
-            isDigit(line[1]) &&
+    flag &= isdigit(line[0]) &&
+            isdigit(line[1]) &&
             isSeparator(line[2], format) &&
-            isDigit(line[3]) &&
-            isDigit(line[4]) &&
+            isdigit(line[3]) &&
+            isdigit(line[4]) &&
             isSeparator(line[5], format) &&
-            isDigit(line[6]) &&
-            isDigit(line[7]) &&
-            isDigit(line[8]) &&
-            isDigit(line[9]) &&
+            isdigit(line[6]) &&
+            isdigit(line[7]) &&
+            isdigit(line[8]) &&
+            isdigit(line[9]) &&
             line[10] == ',' &&
             line[11] == ' ';
     if (line[13] == ':') {
         // insert `0` between 11 and 12, then continue normally. (zero-pad)
         line.insert(11, 1, '0');
     }
-    flag &= isDigit(line[12]) && isDigit(line[13]) && line[14] == ':' && isDigit(line[15]) && isDigit(line[16]);
+    // /(\d|0)\d:\d\d/
+    flag &= isdigit(line[12]) &&
+            isdigit(line[13]) &&
+            line[14] == ':' &&
+            isdigit(line[15]) &&
+            isdigit(line[16]);
 
     // 0123456789ABCDEF- (indexes)
     // dd.dd.dddd, 0d:dd  OR
     // dd.dd.dddd, dd:dd
     return flag;
 
-    // TODO: check number's ranges (1-12, 1-31)
-    // TODO: check that a dash exists (if format & Dash)
-}
-
-bool isDigit(char c) {
-    return c <= '9' && c >= '0';
+    // TODO: check number's ranges (1-12, 1-31) // look at `atoi`.
+    // TODO: check that a dash exists (if format & Dash) or closing parentheses
 }
 
 bool isSeparator(char c, int format) {
