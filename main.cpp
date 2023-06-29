@@ -191,9 +191,9 @@ void handleMessage(std::string content, std::streampos startpos, int format) {
         std::string text = content.substr(i + 1);
         // ioc = sum(count * (count-1)) where count is every character's appearance count.
         // Divided by length * (length-1)
-        
+        // equivalent to `ioc = [sum(#²)-l]/[l²-l]`, where `#` is count and `l` is length. 
     } else {
-        message->ioc = 0.0f;
+        message->ioc = 0.0f; // WhatsApp's messages are uninteresting and shouldn't affect statistics.
     }
 
     printMessage(message);
