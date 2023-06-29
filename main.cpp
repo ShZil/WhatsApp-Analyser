@@ -124,8 +124,9 @@ void handleFile(std::string path) {
         }
         message += line; // add a line to the message
         pos = currentPosition(f); // update the cursor position (placed at the end of `line`)
-        if ((int)pos > 1000) break; // artificial limitation, remove when you think.
-        if (message.length() > 10000) break; // messages shall not be longer than 10000 characters, that would mean the file is not a chat
+        // if ((int)pos > 1000) break; // artificial limitation, remove when you think.
+        if (message.length() > 10000) // messages shall not be longer than 10000 characters, that would mean the file is not a chat
+            break;
     }
     if (isNewMessage(message, messageFormat))
         handleMessage(message, start, messageFormat);
@@ -188,9 +189,18 @@ void handleMessage(std::string content, std::streampos startpos, int format) {
     }
     message->author = found ? author.str() : "WhatsApp";
 
+    // actual message content
+    std::string text;
+    try
+    {
+        text = content.substr(i + 2);
+    }
+    catch (const std::out_of_range& e)
+    {
+        text = "";
+    }
+
     if (found) {
-        // actual message content
-        std::string text = content.substr(i + 1);
         // ioc = sum(count * (count-1)) where count is every character's appearance count.
         // Divided by length * (length-1)
         // equivalent to `ioc = [sum(#²)-l]/[l²-l]`, where `#` is count and `l` is length.
@@ -202,7 +212,9 @@ void handleMessage(std::string content, std::streampos startpos, int format) {
     }
 
     printMessage(message);
-    std::cout << content << std::endl;
+    std::cout << text << std::endl;
+
+    delete message;
 
     // save the message to a global array.
 }
@@ -211,7 +223,7 @@ void printMessage(Message* message) {
     std::cout << "Message at " << message->start << "; len=" << message->length << std::endl;
     std::cout << "Written by " << message->author << std::endl << "Time: ";
     std::cout << +message->year << '-' << +message->month << '-' << +message->day << 'T' << +message->hour << ':' << +message->minute << std::endl;
-    std::cout << "ioc=" << message->ioc;
+    std::cout << "ioc=" << message->ioc << std::endl;
 }
 
 bool isNewMessage(std::string line, int format) {
