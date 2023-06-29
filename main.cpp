@@ -137,6 +137,8 @@ void handleFile(std::string path) {
     // std::cout << buffer << std::endl;
 
     f.close();
+
+    // don't forget to `delete` all the created Messages (array iteration O(1n)?).
 }
 
 void handleMessage(std::string content, std::streampos startpos, int format) {
@@ -191,14 +193,18 @@ void handleMessage(std::string content, std::streampos startpos, int format) {
         std::string text = content.substr(i + 1);
         // ioc = sum(count * (count-1)) where count is every character's appearance count.
         // Divided by length * (length-1)
-        // equivalent to `ioc = [sum(#²)-l]/[l²-l]`, where `#` is count and `l` is length. 
+        // equivalent to `ioc = [sum(#²)-l]/[l²-l]`, where `#` is count and `l` is length.
+        // 1. Get a list of counts. Which character each count is associated with -- doesn't matter. // how would I do this efficiently?
+        // 2. Calculate the sum of squares.
+        // 3. Plug into `message->ioc = [sum_of_squares-l]/[l²-l]`.
     } else {
         message->ioc = 0.0f; // WhatsApp's messages are uninteresting and shouldn't affect statistics.
     }
 
     printMessage(message);
     std::cout << content << std::endl;
-    // propagate the message to all the DFs
+
+    // save the message to a global array.
 }
 
 void printMessage(Message* message) {
