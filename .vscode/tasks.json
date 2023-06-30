@@ -9,7 +9,7 @@
                 "-g",
                 "${fileDirname}/*.cpp",  // Include all .cpp files in the directory
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+                "${fileDirname}\\main.exe"  // compile to `main.exe` no matter which file is executed
             ],
             "options": {
                 "cwd": "${fileDirname}"

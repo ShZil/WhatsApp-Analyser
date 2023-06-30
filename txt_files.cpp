@@ -37,4 +37,10 @@ void extract(std::ifstream& f, char* buffer, int pos) {
     f.clear();
     f.seekg(pos, f.beg);
     f.read(buffer, sizeof(buffer) - 1);
+    buffer[sizeof(buffer) - 1] = '\0';
+}
+
+bool endswithTXT(std::string const &path) {
+    if (path.length() < 4) return false;
+    return 0 == path.compare(path.length() - 4, 4, ".txt");
 }

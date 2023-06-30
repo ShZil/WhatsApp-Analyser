@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "txt_files.h"
+#include "utf8.h"
 
 /*
     Modules:
@@ -91,7 +92,7 @@ int main() {
     std::vector<std::string> paths = getPaths("raw/");
     for (std::string path : paths)
     {
-        // TODO: consider only `.txt` files, not `.txt.ignore`.
+        if (!endswithTXT(path)) continue;
         std::cout << "Reading: " << path << std::endl; // improve this printing to call out "This is the chat with XYZ"
         
         handleFile(path);
@@ -133,8 +134,8 @@ void handleFile(std::string path) {
     // TODO: get rid of `message`?
     f.clear();
     
-    char buffer[8];
-    extract(f, buffer, 13); // extract 7 bytes from position 13 in the file `f`.
+    char buffer[69];
+    extract(f, buffer, 528202); // extract 68 bytes from position 50 in the file `f`.
     // std::cout << buffer << std::endl;
 
     f.close();
