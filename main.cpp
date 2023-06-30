@@ -71,23 +71,24 @@ enum MessageFormat {
     Dash = 32
 };
 
-enum MessageType {
-    text, // most messages
-    media, // <media omitted>
-    none, // empty
+enum MessageType : char {
+    none, // An empty message (mostly software fault).
+    text, // Regular text messages -- most messages sent in usual chats
+    media, // <Media omitted>, or image / video / sticker
+    deleted, // this message was deleted
     whatsapp_info, // whatsapp information
-    create, // created a chat
+    created, // created a chat
     join, // a participant joined / was added
+    leave, // a participant left / was kicked
+    admin, // you are now admin
+    block, // you blocked this contact
+    unblock, // you unblocked this contact
     title, // title change
     description, // description change
     settings, // settings change
-    icon, // icon change
-    admin, // you are now admin
-    leave, // a participant left / was kicked
-    block, // you blocked this contact
-    unblock, // you unblocked this contact
-    deleted // this message was deleted
+    icon // icon change
 };
+MessageType determineMessageType(std::string, std::string);
 
 struct Message {
     int start;
@@ -104,7 +105,7 @@ struct Message {
 
     float ioc;
 
-    int messageType;
+    MessageType messageType;
 };
 void printMessage(Message*);
 
@@ -145,7 +146,7 @@ void handleFile(std::string path) {
         }
         message += line; // add a line to the message
         pos = currentPosition(f); // update the cursor position (placed at the end of `line`)
-        // if ((int)pos > 1000) break; // artificial limitation, remove when you think.
+        if ((int)pos > 1000) break; // artificial limitation, remove when you think.
         if (message.length() > 10000) // messages shall not be longer than 10000 characters, that would mean the file is not a chat
             break;
     }
@@ -228,16 +229,38 @@ void handleMessage(std::string content, std::streampos startpos, int format) {
         // 1. Get a list of counts. Which character each count is associated with -- doesn't matter. // how would I do this efficiently?
         // 2. Calculate the sum of squares.
         // 3. Plug into `message->ioc = [sum_of_squares-l]/[l²-l]`.
+        message->ioc = 1.0f; // temporary
     } else {
         message->ioc = 0.0f; // WhatsApp's messages are uninteresting and shouldn't affect statistics.
     }
 
+    message->messageType = determineMessageType(text, message->author);
+
     printMessage(message);
-    std::cout << text << std::endl;
+    std::cout << content << std::endl;
 
     delete message;
 
-    // save the message to a global array.
+    // save the message to a global array. // or,,, write to a `.csv` file? Depends on what I wanna do with the results
+}
+
+MessageType determineMessageType(std::string text, std::string author) {
+    MessageType result = MessageType::none;
+    if (text == "Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them. Tap to learn more." ||
+        text == "This chat is with a business account. Tap to learn more." ||
+        author == "WhatsApp")
+        result = MessageType::whatsapp_info;
+    if (text == author + " created this group")
+        result = MessageType::created;
+    if (text == author + " joined using this group\'s invite link")
+        result = MessageType::join;
+    if (text == "<Media omitted>" || text == "image omitted" || text == "video omitted" || text == "sticker omitted")
+        result = MessageType::media;
+    if (text == "You deleted this message" || text == "You deleted this message." || text == "This message was deleted.")
+        result = MessageType::deleted;
+    if (result == MessageType::none && text.length() > 0)
+        result = MessageType::text;
+    return result;
 }
 
 void printMessage(Message* message) {
@@ -245,6 +268,7 @@ void printMessage(Message* message) {
     std::cout << "Written by " << message->author << std::endl << "Time: ";
     std::cout << +message->year << '-' << +message->month << '-' << +message->day << 'T' << +message->hour << ':' << +message->minute << std::endl;
     std::cout << "ioc=" << message->ioc << std::endl;
+    std::cout << "messageType=" << +(message->messageType) << std::endl;
 }
 
 bool isNewMessage(std::string line, int format) {
