@@ -71,6 +71,24 @@ enum MessageFormat {
     Dash = 32
 };
 
+enum MessageType {
+    text, // most messages
+    media, // <media omitted>
+    none, // empty
+    whatsapp_info, // whatsapp information
+    create, // created a chat
+    join, // a participant joined / was added
+    title, // title change
+    description, // description change
+    settings, // settings change
+    icon, // icon change
+    admin, // you are now admin
+    leave, // a participant left / was kicked
+    block, // you blocked this contact
+    unblock, // you unblocked this contact
+    deleted // this message was deleted
+};
+
 struct Message {
     int start;
     unsigned short length; // verified max length of a WhatsApp message
@@ -85,6 +103,8 @@ struct Message {
     char minute;
 
     float ioc;
+
+    int messageType;
 };
 void printMessage(Message*);
 
