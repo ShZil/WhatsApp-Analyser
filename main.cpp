@@ -66,9 +66,9 @@ enum MessageFormat {
     // Slashes and dots are exclusive
     Slashes = 4,
     Dots = 8,
-    // Paremtjeses and Dash are exclusive
-    ParenthesesHMS = 16,
-    Dash = 32
+    // Parentheses and Dash are exclusive
+    Parentheses = 16, // has to include seconds in the time signature ("hh:mm:ss]")
+    Dash = 32 // just hours and minutes ("hh:mm - ")
 };
 
 enum MessageType : char {
@@ -123,7 +123,7 @@ int main() {
 }
 
 void handleFile(std::string path) {
-    int messageFormat = DMY | Slashes | Dash; // later on I'll add automatic format detection. Right now it's hardcoded.
+    int messageFormat = DMY | Slashes | Parentheses; // later on I'll add automatic format detection. Right now it's hardcoded.
 
     std::string line;
     std::string message = "";
@@ -172,7 +172,7 @@ void handleMessage(std::string content, std::streampos startpos, int format) {
     Message* message = new Message();
     message->length = (unsigned short)content.length();
     message->start = (int)startpos;
-    if (format & ParenthesesHMS && content[0] == '[') {
+    if (format & Parentheses && content[0] == '[') {
         content.erase(0, 1);
     }
     if (content[13] == ':') {
@@ -202,7 +202,7 @@ void handleMessage(std::string content, std::streampos startpos, int format) {
 
     std::stringstream author;
     bool found = false;
-    for (i = (format & ParenthesesHMS) ? 22 : 20; i <= message->length; ++i) {
+    for (i = (format & Parentheses) ? 22 : 20; i <= message->length; ++i) {
         if (content[i] == ':') {
             found = true;
             break;
@@ -246,6 +246,19 @@ void handleMessage(std::string content, std::streampos startpos, int format) {
 
 MessageType determineMessageType(std::string text, std::string author) {
     MessageType result = MessageType::none;
+
+    if (text.length() == 0) return result;
+    result = MessageType::text;
+
+    // Filter out all negative characters (signed char), especially [U+200E] (Left-to-Right Mark (LRM))
+    int i, j;
+    for (j = -1, i = 0; text[i] != '\0'; i++) {
+        if (text[i] > 0)
+            text[++j] = text[i];
+    }
+    text[j] = '\0';
+
+    // Run a bunch of equality checks to determine which type best describes the message
     if (text == "Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them. Tap to learn more." ||
         text == "This chat is with a business account. Tap to learn more." ||
         author == "WhatsApp")
@@ -258,8 +271,6 @@ MessageType determineMessageType(std::string text, std::string author) {
         result = MessageType::media;
     if (text == "You deleted this message" || text == "You deleted this message." || text == "This message was deleted.")
         result = MessageType::deleted;
-    if (result == MessageType::none && text.length() > 0)
-        result = MessageType::text;
     return result;
 }
 
@@ -273,7 +284,7 @@ void printMessage(Message* message) {
 
 bool isNewMessage(std::string line, int format) {
     if (line.length() < 20) return false;
-    if (format & ParenthesesHMS) {
+    if (format & Parentheses) {
         if (line[0] != '[') return false;
         line.erase(0, 1);
     }
@@ -306,7 +317,7 @@ bool isNewMessage(std::string line, int format) {
     // dd.dd.dddd, 0d:dd  OR
     // dd.dd.dddd, dd:dd
 
-    if (format & ParenthesesHMS) {
+    if (format & Parentheses) {
         // :dd]
         flag &= line.length() > 20 &&
                 line[17] == ':' &&
