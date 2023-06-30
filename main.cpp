@@ -256,11 +256,14 @@ MessageType determineMessageType(std::string text, std::string author) {
         if (text[i] > 0)
             text[++j] = text[i];
     }
-    text[j] = '\0';
+    text[j+1] = '\0';
+    text = std::string(text.c_str());
 
     // Run a bunch of equality checks to determine which type best describes the message
     if (text == "Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them. Tap to learn more." ||
+        text == "Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them." ||
         text == "This chat is with a business account. Tap to learn more." ||
+        text == "This chat is with a business account." ||
         author == "WhatsApp")
         result = MessageType::whatsapp_info;
     if (text == author + " created this group")
