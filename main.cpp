@@ -250,14 +250,8 @@ MessageType determineMessageType(std::string text, std::string author) {
     if (text.length() == 0) return result;
     result = MessageType::text;
 
-    // Filter out all negative characters (signed char), especially [U+200E] (Left-to-Right Mark (LRM))
-    int i, j;
-    for (j = -1, i = 0; text[i] != '\0'; i++) {
-        if (text[i] > 0)
-            text[++j] = text[i];
-    }
-    text[j+1] = '\0';
-    text = std::string(text.c_str());
+    removeNonPositiveChars(text);
+    removeNonPositiveChars(author);
 
     // Run a bunch of equality checks to determine which type best describes the message
     if (text == "Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them. Tap to learn more." ||
