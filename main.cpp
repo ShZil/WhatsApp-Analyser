@@ -237,7 +237,8 @@ void handleMessage(std::string content, std::streampos startpos, int format) {
 
     message->messageType = determineMessageType(text, message->author);
 
-    printMessage(message);
+    if (message->messageType != MessageType::text)
+        printMessage(message);
 
     delete message;
 
@@ -281,8 +282,13 @@ MessageType determineMessageType(std::string text, std::string author) {
         text == author + " changed this group's settings to allow only admins to send messages to this group" ||
         text == author + " changed this group's settings to allow all participants to send messages to this group")
         result = MessageType::settings;
-    if (text == "<Media omitted>" || text == "image omitted" || text == "video omitted" || text == "sticker omitted")
-        result = MessageType::media;
+    if (text == "<Media omitted>" ||
+        text == "image omitted" ||
+        text == "video omitted" ||
+        text == "sticker omitted" ||
+        text == "GIF omitted" ||
+        endswith(text, "document omitted"))
+        result = MessageType::media; // consider splitting into different types of media, if known? // also what about links?
     if (text == "You deleted this message" || text == "You deleted this message." || text == "This message was deleted.")
         result = MessageType::deleted;
     return result;
