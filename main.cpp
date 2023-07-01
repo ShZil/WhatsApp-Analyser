@@ -260,10 +260,27 @@ MessageType determineMessageType(std::string text, std::string author) {
         text == "This chat is with a business account." ||
         author == "WhatsApp")
         result = MessageType::whatsapp_info;
-    if (text == author + " created this group")
+    if (text == author + " created this group" ||
+        text == author + " created this group." ||
+        startswith(text, author + " created group"))
         result = MessageType::created;
-    if (text == author + " joined using this group\'s invite link")
+    if (text == author + " joined using this group\'s invite link" ||
+        endswith(text, " added you") ||
+        endswith(text, " added " + author) ||
+        contains(text, " added "))
         result = MessageType::join;
+    if (startswith(text, author + " changed the subject to"))
+        result = MessageType::title;
+    if (text == author + " changed this group\'s icon")
+        result = MessageType::icon;
+    if (text == author + " changed the group description")
+        result = MessageType::description;
+    if (text == author + " left")
+        result = MessageType::leave;
+    if (text == author + " changed the settings so only admins can edit the group settings" ||
+        text == author + " changed this group's settings to allow only admins to send messages to this group" ||
+        text == author + " changed this group's settings to allow all participants to send messages to this group")
+        result = MessageType::settings;
     if (text == "<Media omitted>" || text == "image omitted" || text == "video omitted" || text == "sticker omitted")
         result = MessageType::media;
     if (text == "You deleted this message" || text == "You deleted this message." || text == "This message was deleted.")
