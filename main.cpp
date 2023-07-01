@@ -58,6 +58,10 @@ void handleFile(std::string);
 void handleMessage(std::string, std::streampos, int);
 bool isNewMessage(std::string, int);
 bool isSeparator(char, int format);
+void removeNonPositiveChars(std::string&);
+bool startswith(const std::string&, const std::string&);
+bool endswith(const std::string&, const std::string&);
+bool contains(const std::string&, const std::string&);
 
 enum MessageFormat {
     // DMY and MDY are exclusive
@@ -346,6 +350,56 @@ bool isSeparator(char c, int format) {
     if (format & Dots) return c == '.';
     throw 33; // invalid format, cannot have neither Slashes nor Dots.
 }
+
+void removeNonPositiveChars(std::string& text) {
+    // Filter out all negative characters (signed char), especially [U+200E] (Left-to-Right Mark (LRM))
+    int i, j;
+    for (j = -1, i = 0; text[i] != '\0'; i++) {
+        if (text[i] > 0)
+            text[++j] = text[i];
+    }
+    text[j+1] = '\0';
+    text = std::string(text.c_str());
+}
+
+bool startswith(const std::string& text, const std::string& beginning) {
+    if (text.length() < beginning.length()) {
+        return false;  // text is shorter, cannot start with beginning
+    }
+
+    for (int i = 0; i < beginning.length(); ++i) {
+        if (text[i] != beginning[i]) {
+            return false;  // characters mismatch, not a match
+        }
+    }
+    
+    return true;
+}
+
+bool endswith(const std::string& text, const std::string& ending) {
+    if (text.length() < ending.length()) {
+        return false;  // text is shorter, cannot end with ending
+    }
+
+    int textLength = text.length();
+    int endingLength = ending.length();
+
+    for (int i = 0; i < endingLength; ++i) {
+        if (text[textLength - endingLength + i] != ending[i]) {
+            return false;  // characters mismatch, not a match
+        }
+    }
+
+    return true;
+}
+
+bool contains(const std::string& a, const std::string& b) {
+    return a.find(b) != std::string::npos;
+}
+
+
+
+
 
 // Also cotinue translating the Python code
 
