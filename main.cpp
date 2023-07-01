@@ -4,6 +4,7 @@
 #include <vector>
 #include <assert.h>
 #include <sstream>
+#include <set>
 
 #include "txt_files.h"
 #include "utf8.h"
@@ -113,6 +114,9 @@ struct Message {
 };
 void printMessage(Message*);
 
+std::set<std::string> authors;
+std::vector<Message*> messages;
+
 int main() {
     std::vector<std::string> paths = getPaths("raw/");
     for (std::string path : paths)
@@ -145,7 +149,7 @@ void handleFile(std::string path) {
             line += "\n"; // add newline character.
         if (isNewMessage(line, messageFormat)) {
             handleMessage(message, start, messageFormat);
-            std::cout << message << std::endl;
+            // std::cout << message << std::endl;
             message = ""; // reset the `message` accumulator, to start a new message.
             start = pos; // reset the `start` of that new message to the [byte-after-last of the last-line of the previous-message].
         }
@@ -157,9 +161,19 @@ void handleFile(std::string path) {
     }
     if (isNewMessage(message, messageFormat))
         handleMessage(message, start, messageFormat);
-        std::cout << message << std::endl;
+        // std::cout << message << std::endl;
     // TODO: get rid of `message`?
     f.clear();
+
+    std::cout << "Participants:" << std::endl;
+    for (const std::string& author : authors) { // also tagged authors and added participants?
+        std::cout << author << std::endl;
+    }
+    authors.clear();
+
+    for (const Message* msg : messages) {
+        delete msg;
+    }
     
     char buffer[69];
     extract(f, buffer, 528202); // extract 68 bytes from position 50 in the file `f`.
@@ -235,20 +249,23 @@ void handleMessage(std::string content, std::streampos startpos, int format) {
         message->ioc = 0.0f; // WhatsApp's messages are uninteresting and shouldn't affect statistics.
     }
 
+    authors.insert(message->author);
     message->messageType = determineMessageType(text, message->author);
 
-    if (message->messageType != MessageType::text)
-        printMessage(message);
+    if (message->messageType != MessageType::text) {
+        // printMessage(message);
+        std::cout << content << std::endl;
+    }
 
-    delete message;
+    messages.push_back(message);
 
     // save the message to a global array. // or,,, write to a `.csv` file? Depends on what I wanna do with the results
 }
 
 MessageType determineMessageType(std::string text, std::string author) {
     MessageType result = MessageType::none;
-
     if (text.length() == 0) return result;
+
     result = MessageType::text;
 
     removeNonPositiveChars(text);
@@ -279,17 +296,26 @@ MessageType determineMessageType(std::string text, std::string author) {
     if (text == author + " left")
         result = MessageType::leave;
     if (text == author + " changed the settings so only admins can edit the group settings" ||
-        text == author + " changed this group's settings to allow only admins to send messages to this group" ||
-        text == author + " changed this group's settings to allow all participants to send messages to this group")
+        text == author + " changed this group\'s settings to allow only admins to send messages to this group" ||
+        text == author + " changed this group\'s settings to allow all participants to send messages to this group")
         result = MessageType::settings;
+    if (text == "You're now an admin")
+        result = MessageType::admin;
     if (text == "<Media omitted>" ||
         text == "image omitted" ||
         text == "video omitted" ||
         text == "sticker omitted" ||
         text == "GIF omitted" ||
+        text == "audio omitted" ||
         endswith(text, "document omitted"))
         result = MessageType::media; // consider splitting into different types of media, if known? // also what about links?
-    if (text == "You deleted this message" || text == "You deleted this message." || text == "This message was deleted.")
+    if (text == "You blocked this contact. Tap to unblock.")
+        result = MessageType::block;
+    if (text == "You unblocked this contact.")
+        result = MessageType::unblock;
+    if (text == "You deleted this message" ||
+        text == "You deleted this message." ||
+        text == "This message was deleted.")
         result = MessageType::deleted;
     return result;
 }
@@ -374,6 +400,7 @@ void removeNonPositiveChars(std::string& text) {
     text[j+1] = '\0';
     text = std::string(text.c_str());
 }
+
 
 bool startswith(const std::string& text, const std::string& beginning) {
     if (text.length() < beginning.length()) {
