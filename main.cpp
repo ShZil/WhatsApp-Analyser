@@ -178,17 +178,15 @@ void handleMessage(std::string content, std::streampos startpos, int format) {
     Message* message = new Message();
     message->length = (unsigned short)content.length();
     message->start = (int)startpos;
-    if (format & Parentheses && content[0] == '[') {
-        content.erase(0, 1);
-    }
-    if (content[13] == ':') {
+    int startsWithParentheses = (int)(format & Parentheses && content[0] == '[');
+    if (content[13 + startsWithParentheses] == ':') {
         // insert `0` between 11 and 12, then continue normally. (singular left zero-pad)
         content.insert(11, 1, '0');
     }
     int i = 0;
     std::stringstream datetime;
     for (i = 0; i <= 16; ++i) {
-        datetime << content[i];
+        datetime << content[i + startsWithParentheses];
     }
 
     int year, month, day, hour, minute;
@@ -208,7 +206,7 @@ void handleMessage(std::string content, std::streampos startpos, int format) {
 
     std::stringstream author;
     bool found = false;
-    for (i = (format & Parentheses) ? 22 : 20; i <= message->length; ++i) {
+    for (i = (format & Parentheses) ? 23 : 20; i <= message->length; ++i) {
         if (content[i] == ':') {
             found = true;
             break;
@@ -219,12 +217,9 @@ void handleMessage(std::string content, std::streampos startpos, int format) {
 
     // actual message content
     std::string text;
-    try
-    {
+    try {
         text = content.substr(i + 2);
-    }
-    catch (const std::out_of_range& e)
-    {
+    } catch (const std::out_of_range& e) {
         text = "";
     }
 
