@@ -145,17 +145,19 @@ void handleFile(std::string path) {
             line += "\n"; // add newline character.
         if (isNewMessage(line, messageFormat)) {
             handleMessage(message, start, messageFormat);
+            std::cout << message << std::endl;
             message = ""; // reset the `message` accumulator, to start a new message.
             start = pos; // reset the `start` of that new message to the [byte-after-last of the last-line of the previous-message].
         }
         message += line; // add a line to the message
         pos = currentPosition(f); // update the cursor position (placed at the end of `line`)
-        if ((int)pos > 1000) break; // artificial limitation, remove when you think.
+        // if ((int)pos > 1000) break; // artificial limitation, remove when you think.
         if (message.length() > 10000) // messages shall not be longer than 10000 characters, that would mean the file is not a chat
             break;
     }
     if (isNewMessage(message, messageFormat))
         handleMessage(message, start, messageFormat);
+        std::cout << message << std::endl;
     // TODO: get rid of `message`?
     f.clear();
     
@@ -241,7 +243,6 @@ void handleMessage(std::string content, std::streampos startpos, int format) {
     message->messageType = determineMessageType(text, message->author);
 
     printMessage(message);
-    std::cout << content << std::endl;
 
     delete message;
 
