@@ -252,14 +252,15 @@ void handleMessage(std::string content, std::streampos startpos, int format) {
     authors.insert(message->author);
     message->messageType = determineMessageType(text, message->author);
 
-    if (message->messageType != MessageType::text) {
+    if (message->messageType != MessageType::text && message->messageType != MessageType::deleted) {
         // printMessage(message);
         std::cout << content << std::endl;
     }
 
     messages.push_back(message);
 
-    // save the message to a global array. // or,,, write to a `.csv` file? Depends on what I wanna do with the results
+    // save the message to a global array.
+    // or,,, write to a `.csv` file? Depends on what I wanna do with the results
 }
 
 MessageType determineMessageType(std::string text, std::string author) {
@@ -270,6 +271,8 @@ MessageType determineMessageType(std::string text, std::string author) {
 
     removeNonPositiveChars(text);
     removeNonPositiveChars(author);
+
+    // TODO: change this for `return` statements for optimal performance!
 
     // Run a bunch of equality checks to determine which type best describes the message
     if (text == "Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them. Tap to learn more." ||
@@ -330,6 +333,7 @@ void printMessage(Message* message) {
 
 bool isNewMessage(std::string line, int format) {
     if (line.length() < 20) return false;
+    // **** here is the problem. There is a message that starts with negative characters, and that's invalid.
     if (format & Parentheses) {
         if (line[0] != '[') return false;
         line.erase(0, 1);
